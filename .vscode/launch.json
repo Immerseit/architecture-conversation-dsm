@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Backend",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/backend"
+    },
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "Frontend",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Starta allt (F5)",
+      "configurations": ["Backend", "Frontend"],
+      "stopAll": true
+    }
+  ]
+}
