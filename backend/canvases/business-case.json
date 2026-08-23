@@ -1,0 +1,136 @@
+{
+  "codlVersion": "2",
+  "typeIri": "68ff77c07e27eebe22af",
+  "name": "Business Case",
+  "provenance": {
+    "definitionSource": "metis",
+    "canvasId": "68ff77c07e27eebe22af",
+    "btabokLibrary": "https://iasa-global.github.io/btabok/",
+    "readOnly": true
+  },
+  "sections": [
+    {
+      "sectionKey": "need",
+      "name": "Need",
+      "description": "Drivers for the project, derived from OKRs — not the approach or solution",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Need", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "approach",
+      "name": "Approach",
+      "description": "Proposed solution to the need — the product or project description",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Approach", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "benefit",
+      "name": "Benefit(s) / Value",
+      "description": "Measured or expected benefits of the solution",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Benefits", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "cost",
+      "name": "Cost(s)",
+      "description": "Expected costs of the solution, product or project",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Costs", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "total_benefit",
+      "name": "Total Benefit",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Total Benefit", "type": "number", "required": false, "format": "currency" }]
+    },
+    {
+      "sectionKey": "benefit_confidence",
+      "name": "Benefit Confidence",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Confidence", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "total_cost",
+      "name": "Total Cost",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Total Cost", "type": "number", "required": false, "format": "currency" }]
+    },
+    {
+      "sectionKey": "cost_confidence",
+      "name": "Cost Confidence",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Confidence", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "timeframe",
+      "name": "Timeframe",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Timeframe", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "npv_irr",
+      "name": "NPV / IRR",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "NPV/IRR", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "roi_percent",
+      "name": "ROI %",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "ROI %", "type": "number", "required": false, "min": -100, "max": 1000 }]
+    },
+    {
+      "sectionKey": "breakeven_point",
+      "name": "Breakeven Point",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Breakeven", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "considerations",
+      "name": "Considerations / Competition / Alternatives / Risks",
+      "description": "Other alternatives and risks to the approach",
+      "cardinality": "many",
+      "fields": [{ "fieldKey": "value", "label": "Consideration", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "decision_refs",
+      "name": "Related Decisions",
+      "description": "Architecture decisions arising from this case",
+      "cardinality": "many",
+      "fields": [
+        {
+          "fieldKey": "value",
+          "label": "Decision",
+          "type": "string",
+          "required": false,
+          "referencedCanvas": "architecture-decision-record",
+          "referencedCanvasName": "Architecture Decision Record"
+        }
+      ]
+    },
+    {
+      "sectionKey": "asr_refs",
+      "name": "Traceability — Requirements",
+      "description": "Native canvas section",
+      "cardinality": "many",
+      "fields": [
+        {
+          "fieldKey": "value",
+          "label": "Requirement",
+          "type": "string",
+          "required": false,
+          "referencedCanvas": "architecturally-significant-requirement",
+          "referencedCanvasName": "Architecturally Significant Requirement"
+        }
+      ]
+    }
+  ]
+}

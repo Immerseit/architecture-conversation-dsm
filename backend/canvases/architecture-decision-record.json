@@ -1,0 +1,139 @@
+{
+  "codlVersion": "2",
+  "typeIri": "696364be003cc58ff2da",
+  "name": "Architecture Decision Record",
+  "provenance": {
+    "definitionSource": "metis",
+    "canvasId": "696364be003cc58ff2da",
+    "btabokLibrary": "https://iasa-global.github.io/btabok/",
+    "readOnly": true
+  },
+  "sections": [
+    {
+      "sectionKey": "decision_name",
+      "name": "Decision Name",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Decision", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "context",
+      "name": "Context",
+      "description": "Describe the forces at play — technological, political, social and project-local; the tensions and dependencies; the facts as you know them",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Context", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "traceability",
+      "name": "Traceability",
+      "description": "What this decision traces to — the requirements (ASR) that drive it",
+      "cardinality": "many",
+      "fields": [
+        {
+          "fieldKey": "value",
+          "label": "Requirement",
+          "type": "string",
+          "required": false,
+          "referencedCanvas": "architecturally-significant-requirement",
+          "referencedCanvasName": "Architecturally Significant Requirement"
+        }
+      ]
+    },
+    {
+      "sectionKey": "comparison",
+      "name": "Comparison",
+      "description": "Score each option against each topic (1-10)",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Options x Topics", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "scope",
+      "name": "Scope and Tier",
+      "description": "How much of the enterprise is affected by the decision, and which safety tier is impacted",
+      "cardinality": "one",
+      "fields": [
+        { "fieldKey": "value", "label": "Scope", "type": "longtext", "required": false },
+        { "fieldKey": "tier", "label": "Tier", "type": "string", "required": false }
+      ]
+    },
+    {
+      "sectionKey": "reversability",
+      "name": "Reversability",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Reversability", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "duration",
+      "name": "Duration",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Duration", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "information_quality",
+      "name": "Information Quality",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Information Quality", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "decision_effort",
+      "name": "Decision Effort",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Decision Effort", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }]
+    },
+    {
+      "sectionKey": "decision_owner",
+      "name": "Decision Owner",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Owner", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "decision_process",
+      "name": "Decision Process",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Process", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "decision_style",
+      "name": "Decision Style",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Style", "type": "string", "required": false }]
+    },
+    {
+      "sectionKey": "rationale",
+      "name": "Rationale",
+      "description": "Additional thinking or consequences of the decision",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Rationale", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "linked_decisions",
+      "name": "Linked Decisions",
+      "description": "Native canvas section",
+      "cardinality": "many",
+      "fields": [
+        {
+          "fieldKey": "value",
+          "label": "Decision",
+          "type": "string",
+          "required": false,
+          "referencedCanvas": "architecture-decision-record",
+          "referencedCanvasName": "Architecture Decision Record"
+        }
+      ]
+    },
+    {
+      "sectionKey": "biases",
+      "name": "Biases",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Bias", "type": "string", "required": false }]
+    }
+  ]
+}

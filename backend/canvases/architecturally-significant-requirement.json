@@ -1,0 +1,103 @@
+{
+  "codlVersion": "2",
+  "typeIri": "675f495d0039af23b2cb",
+  "name": "Architecturally Significant Requirement",
+  "provenance": {
+    "definitionSource": "metis",
+    "canvasId": "675f495d0039af23b2cb",
+    "btabokLibrary": "https://iasa-global.github.io/btabok/",
+    "readOnly": true
+  },
+  "sections": [
+    {
+      "sectionKey": "asr_and_context",
+      "name": "Architecturally Significant Requirement",
+      "description": "The ASR in common requirements format for your target PM method",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Requirement", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "scope",
+      "name": "Scope",
+      "description": "Scope of the requirement",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Scope", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "objectives_impact",
+      "name": "Objectives Impact",
+      "description": "How the requirement impacts objectives",
+      "cardinality": "one",
+      "fields": [{ "fieldKey": "value", "label": "Objectives impact", "type": "longtext", "required": false }]
+    },
+    {
+      "sectionKey": "type",
+      "name": "Type",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [
+        {
+          "fieldKey": "value",
+          "label": "Type",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "functional", "non-functional", "performance", "security", "integration",
+            "compliance", "usability", "availability", "scalability", "maintainability", "other"
+          ]
+        }
+      ]
+    },
+    {
+      "sectionKey": "criticality",
+      "name": "Criticality",
+      "description": "Native canvas section",
+      "cardinality": "one",
+      "fields": [
+        { "fieldKey": "value", "label": "Criticality", "type": "enum", "required": false, "enumValues": ["critical", "high", "medium", "low"] }
+      ]
+    },
+    {
+      "sectionKey": "characteristics",
+      "name": "Characteristics",
+      "description": "Bipolar spectrums estimated with stakeholders",
+      "cardinality": "one",
+      "fields": [
+        { "fieldKey": "cost", "label": "Cost", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "complexity", "label": "Complexity", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "novelty", "label": "Novelty", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "risk", "label": "Risk", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "reward", "label": "Reward", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "legal_comp", "label": "Legal & Comp", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "politics", "label": "Politics", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "constraints", "label": "Constraints", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "skills", "label": "Skills", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 },
+        { "fieldKey": "doability", "label": "Doability", "type": "slider", "required": false, "min": 0, "max": 10, "step": 1 }
+      ]
+    },
+    {
+      "sectionKey": "strategy_and_plan",
+      "name": "Strategy & Plan",
+      "description": "What decisions need to be made and how they will be executed",
+      "cardinality": "one",
+      "fields": [
+        { "fieldKey": "value", "label": "Strategy", "type": "longtext", "required": false },
+        {
+          "fieldKey": "decision_ref",
+          "label": "Decision",
+          "type": "string",
+          "required": false,
+          "referencedCanvas": "architecture-decision-record",
+          "referencedCanvasName": "Architecture Decision Record"
+        }
+      ]
+    },
+    {
+      "sectionKey": "stakeholders",
+      "name": "Stakeholders",
+      "description": "Native canvas section",
+      "cardinality": "many",
+      "fields": [{ "fieldKey": "value", "label": "Stakeholder", "type": "string", "required": false }]
+    }
+  ]
+}

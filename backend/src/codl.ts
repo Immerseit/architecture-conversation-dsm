@@ -118,3 +118,12 @@ export interface StatementLink {
   toStatementId: string;
   verb: string;
 }
+
+export interface CanvasInstance {
+  id: string;
+  typeKey: string;
+  name: string;
+  // sectionKey -> (single value object for cardinality "one", array of value objects for "many")
+  values: Record<string, Record<string, unknown> | Record<string, unknown>[]>;
+  createdAt: string;
+}

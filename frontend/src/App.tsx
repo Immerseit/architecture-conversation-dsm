@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import { api } from './api'
+import Canvases from './Canvases'
 
 interface Dimension {
   key: string
@@ -40,20 +42,8 @@ interface MatrixDetail extends Matrix {
 
 const LEVELS = ['N1', 'N2', 'N3', 'N4'] as const
 
-async function api<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? `HTTP ${res.status}`)
-  }
-  if (res.status === 204) return undefined as T
-  return res.json()
-}
-
 function App() {
+  const [view, setView] = useState<'matrices' | 'canvases'>('matrices')
   const [matrices, setMatrices] = useState<Matrix[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [matrix, setMatrix] = useState<MatrixDetail | null>(null)
@@ -131,38 +121,59 @@ function App() {
     <main style={{ maxWidth: 1100, margin: '2rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
       <h1>DSM — Architecture Conversation Matrix</h1>
 
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        {matrices.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setSelectedId(m.id)}
-            style={{ fontWeight: m.id === selectedId ? 'bold' : 'normal' }}
-          >
-            {m.name}
-          </button>
-        ))}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #ccc' }}>
+        <button
+          onClick={() => setView('matrices')}
+          style={{ fontWeight: view === 'matrices' ? 'bold' : 'normal', padding: '0.4rem 0.8rem' }}
+        >
+          Matriser
+        </button>
+        <button
+          onClick={() => setView('canvases')}
+          style={{ fontWeight: view === 'canvases' ? 'bold' : 'normal', padding: '0.4rem 0.8rem' }}
+        >
+          Canvases
+        </button>
       </div>
 
-      <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-        <input
-          value={newMatrixName}
-          onChange={(e) => setNewMatrixName(e.target.value)}
-          placeholder="Namn på ny matris, t.ex. Current Architecture"
-          style={{ flex: 1, padding: '0.5rem' }}
-        />
-        <button type="submit">Skapa matris</button>
-      </form>
+      {view === 'canvases' && <Canvases />}
 
-      {matrix && (
-        <MatrixView
-          matrix={matrix}
-          onSaveManifest={saveManifest}
-          onAddStatement={addStatement}
-          onDeleteStatement={deleteStatement}
-          onAddLink={addLink}
-          onDeleteLink={deleteLink}
-          onDeleteMatrix={() => deleteMatrix(matrix.id)}
-        />
+      {view === 'matrices' && (
+        <>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            {matrices.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setSelectedId(m.id)}
+                style={{ fontWeight: m.id === selectedId ? 'bold' : 'normal' }}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+            <input
+              value={newMatrixName}
+              onChange={(e) => setNewMatrixName(e.target.value)}
+              placeholder="Namn på ny matris, t.ex. Current Architecture"
+              style={{ flex: 1, padding: '0.5rem' }}
+            />
+            <button type="submit">Skapa matris</button>
+          </form>
+
+          {matrix && (
+            <MatrixView
+              matrix={matrix}
+              onSaveManifest={saveManifest}
+              onAddStatement={addStatement}
+              onDeleteStatement={deleteStatement}
+              onAddLink={addLink}
+              onDeleteLink={deleteLink}
+              onDeleteMatrix={() => deleteMatrix(matrix.id)}
+            />
+          )}
+        </>
       )}
     </main>
   )

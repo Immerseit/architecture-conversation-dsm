@@ -10,21 +10,25 @@ import {
   type Matrix,
   type Statement,
   type StatementLink,
+  type CanvasInstance,
 } from "./codl.js";
+import { canvasDefinitions } from "./canvasDefinitions.js";
 
 interface Store {
   matrices: Matrix[];
   statements: Statement[];
   links: StatementLink[];
+  canvasInstances: CanvasInstance[];
 }
 
 const dataFile = path.join(process.cwd(), "data.json");
 
 function loadStore(): Store {
   try {
-    return JSON.parse(fs.readFileSync(dataFile, "utf-8"));
+    const parsed = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
+    return { canvasInstances: [], ...parsed };
   } catch {
-    return { matrices: [], statements: [], links: [] };
+    return { matrices: [], statements: [], links: [], canvasInstances: [] };
   }
 }
 
@@ -40,6 +44,82 @@ app.use(express.json());
 
 app.get("/api/codl", (_req, res) => {
   res.json({ dsmManifestDefinition, dsmStatementDefinition });
+});
+
+app.get("/api/canvas-types", (_req, res) => {
+  res.json(
+    Object.entries(canvasDefinitions).map(([key, def]) => ({ key, name: def.name, sectionCount: def.sections.length })),
+  );
+});
+
+app.get("/api/canvas-types/:key", (req, res) => {
+  const def = canvasDefinitions[req.params.key];
+  if (!def) {
+    res.status(404).json({ error: "okänd canvas-typ" });
+    return;
+  }
+  res.json(def);
+});
+
+app.get("/api/canvas-instances", (req, res) => {
+  const typeKey = req.query.typeKey;
+  const instances = typeKey ? store.canvasInstances.filter((c) => c.typeKey === typeKey) : store.canvasInstances;
+  res.json(instances);
+});
+
+app.post("/api/canvas-instances", (req, res) => {
+  const typeKey = String(req.body?.typeKey ?? "");
+  if (!canvasDefinitions[typeKey]) {
+    res.status(400).json({ error: "okänd canvas-typ" });
+    return;
+  }
+  const name = String(req.body?.name ?? "").trim();
+  if (!name) {
+    res.status(400).json({ error: "name krävs" });
+    return;
+  }
+  const instance: CanvasInstance = {
+    id: crypto.randomUUID(),
+    typeKey,
+    name,
+    values: req.body?.values ?? {},
+    createdAt: new Date().toISOString(),
+  };
+  store.canvasInstances.push(instance);
+  saveStore();
+  res.status(201).json(instance);
+});
+
+app.get("/api/canvas-instances/:id", (req, res) => {
+  const instance = store.canvasInstances.find((c) => c.id === req.params.id);
+  if (!instance) {
+    res.status(404).json({ error: "hittades inte" });
+    return;
+  }
+  res.json(instance);
+});
+
+app.patch("/api/canvas-instances/:id", (req, res) => {
+  const instance = store.canvasInstances.find((c) => c.id === req.params.id);
+  if (!instance) {
+    res.status(404).json({ error: "hittades inte" });
+    return;
+  }
+  if (typeof req.body?.name === "string") instance.name = req.body.name;
+  if (req.body?.values) instance.values = req.body.values;
+  saveStore();
+  res.json(instance);
+});
+
+app.delete("/api/canvas-instances/:id", (req, res) => {
+  const index = store.canvasInstances.findIndex((c) => c.id === req.params.id);
+  if (index === -1) {
+    res.status(404).json({ error: "hittades inte" });
+    return;
+  }
+  store.canvasInstances.splice(index, 1);
+  saveStore();
+  res.status(204).end();
 });
 
 app.get("/api/matrices", (_req, res) => {
@@ -189,7 +269,15 @@ app.delete("/api/links/:id", (req, res) => {
   res.status(204).end();
 });
 
-const port = 3002;
+const publicDir = path.join(process.cwd(), "public");
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.join(publicDir, "index.html"));
+  });
+}
+
+const port = process.env.PORT ? Number(process.env.PORT) : 3002;
 app.listen(port, () => {
   console.log(`DSM-backend körs på http://localhost:${port}`);
 });
