@@ -1,0 +1,45 @@
+{
+  "canvasType": "solution.domain.canvas",
+  "name": "Member Services Platform",
+  "purpose": "Enable digital service delivery for members and internal support teams with consistent case management, policy workflows, and integration points.",
+  "owner": "Platform Architecture",
+  "business": {
+    "outcomes": "Faster member service, fewer manual handoffs, transparent policy handling.",
+    "stakeholders": "Members, case handlers, product owners, platform engineering, security.",
+    "constraints": "Must support existing enterprise identity and compliance controls."
+  },
+  "data": {
+    "domainModel": "Member, case, entitlement, document, workflow, and audit records.",
+    "dataOwners": "Member Operations, Data Governance, Product Management.",
+    "dataClasses": "Personal data, operational data, policy data, audit data."
+  },
+  "applications": [
+    {
+      "name": "Case Management API",
+      "responsibility": "Handles member case intake, tasks, and workflow orchestration."
+    },
+    {
+      "name": "Policy Decision Service",
+      "responsibility": "Evaluates rules and applies eligibility logic to decisions."
+    },
+    {
+      "name": "Document Service",
+      "responsibility": "Stores and retrieves supporting documents and evidence."
+    }
+  ],
+  "technology": {
+    "platform": "Containerized cloud services with event-driven integration",
+    "deploymentModel": "Multi-service deployment with private networking and API gateways",
+    "securityModel": "Role-based access, encryption at rest and in transit, audit trails"
+  },
+  "decisions": [
+    {
+      "decision": "Adopt a domain-aligned modular service boundary",
+      "rationale": "Keeps domain ownership clear and reduces cross-team coupling."
+    },
+    {
+      "decision": "Use event-driven integration for asynchronous workflow updates",
+      "rationale": "Improves resilience and supports independent service evolution."
+    }
+  ]
+}
