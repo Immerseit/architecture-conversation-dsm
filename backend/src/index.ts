@@ -23,20 +23,29 @@ interface Store {
 
 const dataFile = path.join(process.cwd(), "data.json");
 
-function loadStore(): Store {
-  try {
-    const parsed = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
-    return { canvasInstances: [], ...parsed };
-  } catch {
-    return { matrices: [], statements: [], links: [], canvasInstances: [] };
-  }
+function emptyStore(): Store {
+  return { matrices: [], statements: [], links: [], canvasInstances: [] };
 }
+
+function initializeStoreFile() {
+  if (fs.existsSync(dataFile)) return;
+
+  // Create the file only when it is missing. The wx flag prevents an existing
+  // file from being replaced if another process creates it at the same time.
+  fs.writeFileSync(dataFile, JSON.stringify(emptyStore(), null, 2), { encoding: "utf-8", flag: "wx" });
+}
+
+function loadStore(): Store {
+  const parsed = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
+  return { ...emptyStore(), ...parsed };
+}
+
+initializeStoreFile();
+const store: Store = loadStore();
 
 function saveStore() {
   fs.writeFileSync(dataFile, JSON.stringify(store, null, 2));
 }
-
-const store: Store = loadStore();
 
 const app = express();
 app.use(cors());

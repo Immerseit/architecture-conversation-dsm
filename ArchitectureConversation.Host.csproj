@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>ArchitectureConversation.Host</AssemblyName>
+    <RootNamespace>ArchitectureConversation.Host</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RestoreIgnoreFailedSources>true</RestoreIgnoreFailedSources>
+
+    <!-- Visual Studio may not inherit the interactive shell's PATH. Prefer the
+         standard Node.js installations, but still allow npm.cmd from PATH. -->
+    <NpmCommand Condition="Exists('$(ProgramFiles)\nodejs\npm.cmd')">$(ProgramFiles)\nodejs\npm.cmd</NpmCommand>
+    <NpmCommand Condition="'$(NpmCommand)' == '' And Exists('$(ProgramFiles(x86))\nodejs\npm.cmd')">$(ProgramFiles(x86))\nodejs\npm.cmd</NpmCommand>
+    <NpmCommand Condition="'$(NpmCommand)' == '' And Exists('$(LOCALAPPDATA)\Programs\nodejs\npm.cmd')">$(LOCALAPPDATA)\Programs\nodejs\npm.cmd</NpmCommand>
+    <NpmCommand Condition="'$(NpmCommand)' == ''">npm.cmd</NpmCommand>
+  </PropertyGroup>
+
+  <Target Name="BuildJavaScriptApplication" BeforeTargets="Build">
+    <Exec Command="&quot;$(NpmCommand)&quot; run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <Target Name="CleanJavaScriptApplication" AfterTargets="Clean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\frontend\dist" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\backend\dist" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\backend\public" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+</Project>

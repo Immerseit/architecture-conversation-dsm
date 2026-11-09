@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Architecture Conversation (npm run dev)": {
+      "commandName": "Executable",
+      "executablePath": "..\\..\\..\\scripts\\start-dev.cmd",
+      "commandLineArgs": "run dev",
+      "nativeDebugging": false,
+      "launchBrowser": true,
+      "launchUrl": "http://localhost:5173",
+      "environmentVariables": {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}
