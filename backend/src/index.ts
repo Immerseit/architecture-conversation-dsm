@@ -14,39 +14,9 @@ import {
   type CanvasInstance,
 } from "./codl.js";
 import { canvasDefinitions } from "./canvasDefinitions.js";
+import { initializeDatabase, saveStore, type Store } from "./database.js";
 
-interface Store {
-  matrices: Matrix[];
-  statements: Statement[];
-  links: StatementLink[];
-  canvasInstances: CanvasInstance[];
-}
-
-const dataFile = path.join(process.cwd(), "data.json");
-
-function emptyStore(): Store {
-  return { matrices: [], statements: [], links: [], canvasInstances: [] };
-}
-
-function initializeStoreFile() {
-  if (fs.existsSync(dataFile)) return;
-
-  // Create the file only when it is missing. The wx flag prevents an existing
-  // file from being replaced if another process creates it at the same time.
-  fs.writeFileSync(dataFile, JSON.stringify(emptyStore(), null, 2), { encoding: "utf-8", flag: "wx" });
-}
-
-function loadStore(): Store {
-  const parsed = JSON.parse(fs.readFileSync(dataFile, "utf-8"));
-  return { ...emptyStore(), ...parsed };
-}
-
-initializeStoreFile();
-const store: Store = loadStore();
-
-function saveStore() {
-  fs.writeFileSync(dataFile, JSON.stringify(store, null, 2));
-}
+let store: Store;
 
 function hashAccessKey(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -58,11 +28,11 @@ function suppliedAccessKey(req: express.Request): string {
 }
 
 function canAccessMatrix(matrix: Matrix, key: string): boolean {
-  return !matrix.accessKeyHash || (!!key && hashAccessKey(key) === matrix.accessKeyHash);
+  return !matrix.accessKeyHash || (!!key && (matrix.accessKey === key || hashAccessKey(key) === matrix.accessKeyHash));
 }
 
-function publicMatrix(matrix: Matrix): Omit<Matrix, "accessKeyHash"> & { isProtected: boolean } {
-  const { accessKeyHash: _accessKeyHash, ...safeMatrix } = matrix;
+function publicMatrix(matrix: Matrix): Omit<Matrix, "accessKeyHash" | "accessKey"> & { isProtected: boolean } {
+  const { accessKeyHash: _accessKeyHash, accessKey: _accessKey, ...safeMatrix } = matrix;
   return { ...safeMatrix, isProtected: Boolean(matrix.accessKeyHash) };
 }
 
@@ -108,7 +78,7 @@ app.get("/api/canvas-instances", (req, res) => {
   res.json(instances);
 });
 
-app.post("/api/canvas-instances", (req, res) => {
+app.post("/api/canvas-instances", async (req, res) => {
   const typeKey = String(req.body?.typeKey ?? "");
   if (!canvasDefinitions[typeKey]) {
     res.status(400).json({ error: "okänd canvas-typ" });
@@ -127,7 +97,7 @@ app.post("/api/canvas-instances", (req, res) => {
     createdAt: new Date().toISOString(),
   };
   store.canvasInstances.push(instance);
-  saveStore();
+  await saveStore(store);
   res.status(201).json(instance);
 });
 
@@ -140,7 +110,7 @@ app.get("/api/canvas-instances/:id", (req, res) => {
   res.json(instance);
 });
 
-app.patch("/api/canvas-instances/:id", (req, res) => {
+app.patch("/api/canvas-instances/:id", async (req, res) => {
   const instance = store.canvasInstances.find((c) => c.id === req.params.id);
   if (!instance) {
     res.status(404).json({ error: "hittades inte" });
@@ -148,18 +118,18 @@ app.patch("/api/canvas-instances/:id", (req, res) => {
   }
   if (typeof req.body?.name === "string") instance.name = req.body.name;
   if (req.body?.values) instance.values = req.body.values;
-  saveStore();
+  await saveStore(store);
   res.json(instance);
 });
 
-app.delete("/api/canvas-instances/:id", (req, res) => {
+app.delete("/api/canvas-instances/:id", async (req, res) => {
   const index = store.canvasInstances.findIndex((c) => c.id === req.params.id);
   if (index === -1) {
     res.status(404).json({ error: "hittades inte" });
     return;
   }
   store.canvasInstances.splice(index, 1);
-  saveStore();
+  await saveStore(store);
   res.status(204).end();
 });
 
@@ -168,7 +138,7 @@ app.get("/api/matrices", (req, res) => {
   res.json(store.matrices.filter((matrix) => canAccessMatrix(matrix, key)).map(publicMatrix));
 });
 
-app.post("/api/matrices", (req, res) => {
+app.post("/api/matrices", async (req, res) => {
   const name = String(req.body?.name ?? "").trim();
   if (!name) {
     res.status(400).json({ error: "name krävs" });
@@ -181,10 +151,10 @@ app.post("/api/matrices", (req, res) => {
     manifest: String(req.body?.manifest ?? ""),
     dimensions: DEFAULT_DIMENSIONS,
     createdAt: new Date().toISOString(),
-    ...(accessKey ? { accessKeyHash: hashAccessKey(accessKey) } : {}),
+    ...(accessKey ? { accessKey, accessKeyHash: hashAccessKey(accessKey) } : {}),
   };
   store.matrices.push(matrix);
-  saveStore();
+  await saveStore(store);
   res.status(201).json(publicMatrix(matrix));
 });
 
@@ -196,26 +166,26 @@ app.get("/api/matrices/:id", (req, res) => {
   res.json({ ...publicMatrix(matrix), statements, links });
 });
 
-app.patch("/api/matrices/:id", (req, res) => {
+app.patch("/api/matrices/:id", async (req, res) => {
   const matrix = findAuthorizedMatrix(req, res);
   if (!matrix) return;
   if (typeof req.body?.manifest === "string") matrix.manifest = req.body.manifest;
   if (Array.isArray(req.body?.dimensions)) matrix.dimensions = req.body.dimensions;
-  saveStore();
+  await saveStore(store);
   res.json(publicMatrix(matrix));
 });
 
-app.delete("/api/matrices/:id", (req, res) => {
+app.delete("/api/matrices/:id", async (req, res) => {
   const matrix = findAuthorizedMatrix(req, res);
   if (!matrix) return;
   store.matrices = store.matrices.filter((m) => m.id !== matrix.id);
   store.statements = store.statements.filter((s) => s.matrixId !== matrix.id);
   store.links = store.links.filter((l) => l.matrixId !== matrix.id);
-  saveStore();
+  await saveStore(store);
   res.status(204).end();
 });
 
-app.post("/api/matrices/:id/statements", (req, res) => {
+app.post("/api/matrices/:id/statements", async (req, res) => {
   const matrix = findAuthorizedMatrix(req, res);
   if (!matrix) return;
   const level = req.body?.level;
@@ -238,11 +208,11 @@ app.post("/api/matrices/:id/statements", (req, res) => {
     createdAt: new Date().toISOString(),
   };
   store.statements.push(statement);
-  saveStore();
+  await saveStore(store);
   res.status(201).json(statement);
 });
 
-app.patch("/api/statements/:id", (req, res) => {
+app.patch("/api/statements/:id", async (req, res) => {
   const statement = store.statements.find((s) => s.id === req.params.id);
   if (!statement) {
     res.status(404).json({ error: "påstående hittades inte" });
@@ -262,11 +232,11 @@ app.patch("/api/statements/:id", (req, res) => {
     statement.content = content;
   }
   if (Array.isArray(req.body?.tags)) statement.tags = req.body.tags.map(String);
-  saveStore();
+  await saveStore(store);
   res.json(statement);
 });
 
-app.delete("/api/statements/:id", (req, res) => {
+app.delete("/api/statements/:id", async (req, res) => {
   const statement = store.statements.find((s) => s.id === req.params.id);
   if (!statement) {
     res.status(404).json({ error: "hittades inte" });
@@ -279,11 +249,11 @@ app.delete("/api/statements/:id", (req, res) => {
   }
   store.statements = store.statements.filter((s) => s.id !== req.params.id);
   store.links = store.links.filter((l) => l.fromStatementId !== req.params.id && l.toStatementId !== req.params.id);
-  saveStore();
+  await saveStore(store);
   res.status(204).end();
 });
 
-app.post("/api/matrices/:id/links", (req, res) => {
+app.post("/api/matrices/:id/links", async (req, res) => {
   const matrix = findAuthorizedMatrix(req, res);
   if (!matrix) return;
   const { fromStatementId, toStatementId } = req.body ?? {};
@@ -300,11 +270,11 @@ app.post("/api/matrices/:id/links", (req, res) => {
     verb: String(req.body?.verb ?? "relates_to"),
   };
   store.links.push(link);
-  saveStore();
+  await saveStore(store);
   res.status(201).json(link);
 });
 
-app.delete("/api/links/:id", (req, res) => {
+app.delete("/api/links/:id", async (req, res) => {
   const link = store.links.find((l) => l.id === req.params.id);
   if (!link) {
     res.status(404).json({ error: "hittades inte" });
@@ -316,7 +286,7 @@ app.delete("/api/links/:id", (req, res) => {
     return;
   }
   store.links = store.links.filter((l) => l.id !== req.params.id);
-  saveStore();
+  await saveStore(store);
   res.status(204).end();
 });
 
@@ -329,6 +299,14 @@ if (fs.existsSync(publicDir)) {
 }
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3002;
-app.listen(port, () => {
-  console.log(`DSM-backend körs på http://localhost:${port}`);
-});
+initializeDatabase(path.join(process.cwd(), "data.json"))
+  .then((loadedStore) => {
+    store = loadedStore;
+    app.listen(port, () => {
+      console.log(`DSM-backend körs på http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Kunde inte initiera Azure SQL-databasen:", error);
+    process.exitCode = 1;
+  });

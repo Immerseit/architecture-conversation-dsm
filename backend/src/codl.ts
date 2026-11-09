@@ -101,6 +101,8 @@ export interface Matrix {
   createdAt: string;
   /** SHA-256 hash of the optional access key; absent means public. */
   accessKeyHash?: string;
+  /** The access-key group used by the SQL persistence layer. */
+  accessKey?: string;
 }
 
 export interface Statement {
