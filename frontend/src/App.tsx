@@ -15,6 +15,7 @@ interface Matrix {
   manifest: string
   dimensions: Dimension[]
   createdAt: string
+  isProtected?: boolean
 }
 
 interface Statement {
@@ -48,65 +49,71 @@ function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [matrix, setMatrix] = useState<MatrixDetail | null>(null)
   const [newMatrixName, setNewMatrixName] = useState('')
+  const [newMatrixKey, setNewMatrixKey] = useState('')
+  const [matrixKey, setMatrixKey] = useState('')
+  const matrixUrl = (id: string) => `/api/matrices/${id}?key=${encodeURIComponent(matrixKey)}`
 
   useEffect(() => {
-    api<Matrix[]>('/api/matrices').then(setMatrices)
-  }, [])
+    api<Matrix[]>(`/api/matrices?key=${encodeURIComponent(matrixKey)}`).then(setMatrices)
+  }, [matrixKey])
 
   useEffect(() => {
     if (!selectedId) {
       setMatrix(null)
       return
     }
-    api<MatrixDetail>(`/api/matrices/${selectedId}`).then(setMatrix)
-  }, [selectedId])
+    api<MatrixDetail>(matrixUrl(selectedId)).then(setMatrix)
+  }, [selectedId, matrixKey])
 
   async function createMatrix(e: React.FormEvent) {
     e.preventDefault()
     if (!newMatrixName.trim()) return
+    const key = newMatrixKey.trim()
     const created = await api<Matrix>('/api/matrices', {
       method: 'POST',
-      body: JSON.stringify({ name: newMatrixName }),
+      body: JSON.stringify({ name: newMatrixName, key: key || undefined }),
     })
+    if (key) setMatrixKey(key)
     setMatrices((prev) => [...prev, created])
     setNewMatrixName('')
+    setNewMatrixKey('')
     setSelectedId(created.id)
   }
 
   async function deleteMatrix(id: string) {
-    await api(`/api/matrices/${id}`, { method: 'DELETE' })
+    await api(matrixUrl(id), { method: 'DELETE' })
     setMatrices((prev) => prev.filter((m) => m.id !== id))
     if (selectedId === id) setSelectedId(null)
   }
 
   async function refreshMatrix() {
     if (!selectedId) return
-    setMatrix(await api<MatrixDetail>(`/api/matrices/${selectedId}`))
+    setMatrix(await api<MatrixDetail>(matrixUrl(selectedId)))
   }
 
   async function saveManifest(value: string) {
     if (!matrix) return
-    await api(`/api/matrices/${matrix.id}`, { method: 'PATCH', body: JSON.stringify({ manifest: value }) })
+    await api(`/api/matrices/${matrix.id}`, { method: 'PATCH', body: JSON.stringify({ manifest: value, key: matrixKey }) })
   }
 
   async function addStatement(level: string, dimensionKey: string, content: string, tags: string[]) {
     if (!matrix) return
     await api(`/api/matrices/${matrix.id}/statements`, {
       method: 'POST',
-      body: JSON.stringify({ level, dimensionKey, content, tags }),
+      body: JSON.stringify({ level, dimensionKey, content, tags, key: matrixKey }),
     })
     await refreshMatrix()
   }
 
   async function deleteStatement(id: string) {
-    await api(`/api/statements/${id}`, { method: 'DELETE' })
+    await api(`/api/statements/${id}?key=${encodeURIComponent(matrixKey)}`, { method: 'DELETE' })
     await refreshMatrix()
   }
 
   async function updateStatement(id: string, content: string, tags: string[]) {
     await api(`/api/statements/${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ content, tags }),
+      body: JSON.stringify({ content, tags, key: matrixKey }),
     })
     await refreshMatrix()
   }
@@ -115,13 +122,13 @@ function App() {
     if (!matrix || !toStatementId) return
     await api(`/api/matrices/${matrix.id}/links`, {
       method: 'POST',
-      body: JSON.stringify({ fromStatementId, toStatementId }),
+      body: JSON.stringify({ fromStatementId, toStatementId, key: matrixKey }),
     })
     await refreshMatrix()
   }
 
   async function deleteLink(id: string) {
-    await api(`/api/links/${id}`, { method: 'DELETE' })
+    await api(`/api/links/${id}?key=${encodeURIComponent(matrixKey)}`, { method: 'DELETE' })
     await refreshMatrix()
   }
 
@@ -160,11 +167,29 @@ function App() {
             ))}
           </div>
 
-          <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <input
+              type="password"
+              value={matrixKey}
+              onChange={(e) => setMatrixKey(e.target.value)}
+              placeholder="Nyckel för privata matriser"
+              style={{ flex: 1, padding: '0.5rem' }}
+            />
+            <button type="button" onClick={() => setMatrixKey(matrixKey.trim())}>Ladda matriser</button>
+          </div>
+
+          <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <input
               value={newMatrixName}
               onChange={(e) => setNewMatrixName(e.target.value)}
               placeholder="Namn på ny matris, t.ex. Current Architecture"
+              style={{ flex: 1, padding: '0.5rem' }}
+            />
+            <input
+              type="password"
+              value={newMatrixKey}
+              onChange={(e) => setNewMatrixKey(e.target.value)}
+              placeholder="Valfri nyckel"
               style={{ flex: 1, padding: '0.5rem' }}
             />
             <button type="submit">Skapa matris</button>

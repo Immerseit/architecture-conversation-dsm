@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import fs from "node:fs";
 import path from "node:path";
+import { createHash, randomUUID } from "node:crypto";
 import {
   DEFAULT_DIMENSIONS,
   dsmManifestDefinition,
@@ -47,6 +48,37 @@ function saveStore() {
   fs.writeFileSync(dataFile, JSON.stringify(store, null, 2));
 }
 
+function hashAccessKey(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function suppliedAccessKey(req: express.Request): string {
+  const value = req.query.key ?? req.body?.key;
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function canAccessMatrix(matrix: Matrix, key: string): boolean {
+  return !matrix.accessKeyHash || (!!key && hashAccessKey(key) === matrix.accessKeyHash);
+}
+
+function publicMatrix(matrix: Matrix): Omit<Matrix, "accessKeyHash"> & { isProtected: boolean } {
+  const { accessKeyHash: _accessKeyHash, ...safeMatrix } = matrix;
+  return { ...safeMatrix, isProtected: Boolean(matrix.accessKeyHash) };
+}
+
+function findAuthorizedMatrix(req: express.Request, res: express.Response): Matrix | undefined {
+  const matrix = store.matrices.find((m) => m.id === req.params.id);
+  if (!matrix) {
+    res.status(404).json({ error: "hittades inte" });
+    return undefined;
+  }
+  if (!canAccessMatrix(matrix, suppliedAccessKey(req))) {
+    res.status(403).json({ error: "rätt nyckel krävs" });
+    return undefined;
+  }
+  return matrix;
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -88,7 +120,7 @@ app.post("/api/canvas-instances", (req, res) => {
     return;
   }
   const instance: CanvasInstance = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     typeKey,
     name,
     values: req.body?.values ?? {},
@@ -131,8 +163,9 @@ app.delete("/api/canvas-instances/:id", (req, res) => {
   res.status(204).end();
 });
 
-app.get("/api/matrices", (_req, res) => {
-  res.json(store.matrices);
+app.get("/api/matrices", (req, res) => {
+  const key = suppliedAccessKey(req);
+  res.json(store.matrices.filter((matrix) => canAccessMatrix(matrix, key)).map(publicMatrix));
 });
 
 app.post("/api/matrices", (req, res) => {
@@ -141,60 +174,50 @@ app.post("/api/matrices", (req, res) => {
     res.status(400).json({ error: "name krävs" });
     return;
   }
+  const accessKey = String(req.body?.key ?? "").trim();
   const matrix: Matrix = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     name,
     manifest: String(req.body?.manifest ?? ""),
     dimensions: DEFAULT_DIMENSIONS,
     createdAt: new Date().toISOString(),
+    ...(accessKey ? { accessKeyHash: hashAccessKey(accessKey) } : {}),
   };
   store.matrices.push(matrix);
   saveStore();
-  res.status(201).json(matrix);
+  res.status(201).json(publicMatrix(matrix));
 });
 
 app.get("/api/matrices/:id", (req, res) => {
-  const matrix = store.matrices.find((m) => m.id === req.params.id);
-  if (!matrix) {
-    res.status(404).json({ error: "hittades inte" });
-    return;
-  }
+  const matrix = findAuthorizedMatrix(req, res);
+  if (!matrix) return;
   const statements = store.statements.filter((s) => s.matrixId === matrix.id);
   const links = store.links.filter((l) => l.matrixId === matrix.id);
-  res.json({ ...matrix, statements, links });
+  res.json({ ...publicMatrix(matrix), statements, links });
 });
 
 app.patch("/api/matrices/:id", (req, res) => {
-  const matrix = store.matrices.find((m) => m.id === req.params.id);
-  if (!matrix) {
-    res.status(404).json({ error: "hittades inte" });
-    return;
-  }
+  const matrix = findAuthorizedMatrix(req, res);
+  if (!matrix) return;
   if (typeof req.body?.manifest === "string") matrix.manifest = req.body.manifest;
   if (Array.isArray(req.body?.dimensions)) matrix.dimensions = req.body.dimensions;
   saveStore();
-  res.json(matrix);
+  res.json(publicMatrix(matrix));
 });
 
 app.delete("/api/matrices/:id", (req, res) => {
-  const index = store.matrices.findIndex((m) => m.id === req.params.id);
-  if (index === -1) {
-    res.status(404).json({ error: "hittades inte" });
-    return;
-  }
-  store.matrices.splice(index, 1);
-  store.statements = store.statements.filter((s) => s.matrixId !== req.params.id);
-  store.links = store.links.filter((l) => l.matrixId !== req.params.id);
+  const matrix = findAuthorizedMatrix(req, res);
+  if (!matrix) return;
+  store.matrices = store.matrices.filter((m) => m.id !== matrix.id);
+  store.statements = store.statements.filter((s) => s.matrixId !== matrix.id);
+  store.links = store.links.filter((l) => l.matrixId !== matrix.id);
   saveStore();
   res.status(204).end();
 });
 
 app.post("/api/matrices/:id/statements", (req, res) => {
-  const matrix = store.matrices.find((m) => m.id === req.params.id);
-  if (!matrix) {
-    res.status(404).json({ error: "matris hittades inte" });
-    return;
-  }
+  const matrix = findAuthorizedMatrix(req, res);
+  if (!matrix) return;
   const level = req.body?.level;
   const dimensionKey = req.body?.dimensionKey;
   if (!["N1", "N2", "N3", "N4"].includes(level)) {
@@ -206,7 +229,7 @@ app.post("/api/matrices/:id/statements", (req, res) => {
     return;
   }
   const statement: Statement = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     matrixId: matrix.id,
     level,
     dimensionKey,
@@ -225,6 +248,11 @@ app.patch("/api/statements/:id", (req, res) => {
     res.status(404).json({ error: "påstående hittades inte" });
     return;
   }
+  const matrix = store.matrices.find((m) => m.id === statement.matrixId);
+  if (!matrix || !canAccessMatrix(matrix, suppliedAccessKey(req))) {
+    res.status(403).json({ error: "rätt nyckel krävs" });
+    return;
+  }
   if (typeof req.body?.content === "string") {
     const content = req.body.content.trim();
     if (!content) {
@@ -239,23 +267,25 @@ app.patch("/api/statements/:id", (req, res) => {
 });
 
 app.delete("/api/statements/:id", (req, res) => {
-  const index = store.statements.findIndex((s) => s.id === req.params.id);
-  if (index === -1) {
+  const statement = store.statements.find((s) => s.id === req.params.id);
+  if (!statement) {
     res.status(404).json({ error: "hittades inte" });
     return;
   }
-  store.statements.splice(index, 1);
+  const matrix = store.matrices.find((m) => m.id === statement.matrixId);
+  if (!matrix || !canAccessMatrix(matrix, suppliedAccessKey(req))) {
+    res.status(403).json({ error: "rätt nyckel krävs" });
+    return;
+  }
+  store.statements = store.statements.filter((s) => s.id !== req.params.id);
   store.links = store.links.filter((l) => l.fromStatementId !== req.params.id && l.toStatementId !== req.params.id);
   saveStore();
   res.status(204).end();
 });
 
 app.post("/api/matrices/:id/links", (req, res) => {
-  const matrix = store.matrices.find((m) => m.id === req.params.id);
-  if (!matrix) {
-    res.status(404).json({ error: "matris hittades inte" });
-    return;
-  }
+  const matrix = findAuthorizedMatrix(req, res);
+  if (!matrix) return;
   const { fromStatementId, toStatementId } = req.body ?? {};
   const validIds = new Set(store.statements.filter((s) => s.matrixId === matrix.id).map((s) => s.id));
   if (!validIds.has(fromStatementId) || !validIds.has(toStatementId)) {
@@ -263,7 +293,7 @@ app.post("/api/matrices/:id/links", (req, res) => {
     return;
   }
   const link: StatementLink = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     matrixId: matrix.id,
     fromStatementId,
     toStatementId,
@@ -275,12 +305,17 @@ app.post("/api/matrices/:id/links", (req, res) => {
 });
 
 app.delete("/api/links/:id", (req, res) => {
-  const index = store.links.findIndex((l) => l.id === req.params.id);
-  if (index === -1) {
+  const link = store.links.find((l) => l.id === req.params.id);
+  if (!link) {
     res.status(404).json({ error: "hittades inte" });
     return;
   }
-  store.links.splice(index, 1);
+  const matrix = store.matrices.find((m) => m.id === link.matrixId);
+  if (!matrix || !canAccessMatrix(matrix, suppliedAccessKey(req))) {
+    res.status(403).json({ error: "rätt nyckel krävs" });
+    return;
+  }
+  store.links = store.links.filter((l) => l.id !== req.params.id);
   saveStore();
   res.status(204).end();
 });

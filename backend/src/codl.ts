@@ -99,6 +99,8 @@ export interface Matrix {
   manifest: string;
   dimensions: Dimension[];
   createdAt: string;
+  /** SHA-256 hash of the optional access key; absent means public. */
+  accessKeyHash?: string;
 }
 
 export interface Statement {
