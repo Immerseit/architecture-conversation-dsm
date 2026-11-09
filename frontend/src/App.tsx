@@ -103,6 +103,14 @@ function App() {
     await refreshMatrix()
   }
 
+  async function updateStatement(id: string, content: string, tags: string[]) {
+    await api(`/api/statements/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ content, tags }),
+    })
+    await refreshMatrix()
+  }
+
   async function addLink(fromStatementId: string, toStatementId: string) {
     if (!matrix || !toStatementId) return
     await api(`/api/matrices/${matrix.id}/links`, {
@@ -167,6 +175,7 @@ function App() {
               matrix={matrix}
               onSaveManifest={saveManifest}
               onAddStatement={addStatement}
+              onUpdateStatement={updateStatement}
               onDeleteStatement={deleteStatement}
               onAddLink={addLink}
               onDeleteLink={deleteLink}
@@ -183,6 +192,7 @@ function MatrixView({
   matrix,
   onSaveManifest,
   onAddStatement,
+  onUpdateStatement,
   onDeleteStatement,
   onAddLink,
   onDeleteLink,
@@ -191,6 +201,7 @@ function MatrixView({
   matrix: MatrixDetail
   onSaveManifest: (value: string) => void
   onAddStatement: (level: string, dimensionKey: string, content: string, tags: string[]) => void
+  onUpdateStatement: (id: string, content: string, tags: string[]) => void
   onDeleteStatement: (id: string) => void
   onAddLink: (fromId: string, toId: string) => void
   onDeleteLink: (id: string) => void
@@ -200,6 +211,7 @@ function MatrixView({
   const [addingCell, setAddingCell] = useState<{ level: string; dimensionKey: string } | null>(null)
   const [draftContent, setDraftContent] = useState('')
   const [draftTags, setDraftTags] = useState('')
+  const [editingStatement, setEditingStatement] = useState<{ id: string; content: string; tags: string } | null>(null)
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null)
 
   useEffect(() => setManifest(matrix.manifest), [matrix.id, matrix.manifest])
@@ -218,6 +230,13 @@ function MatrixView({
     setDraftContent('')
     setDraftTags('')
     setAddingCell(null)
+  }
+
+  function submitStatementEdit() {
+    if (!editingStatement?.content.trim()) return
+    const tags = editingStatement.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    onUpdateStatement(editingStatement.id, editingStatement.content, tags)
+    setEditingStatement(null)
   }
 
   return (
@@ -278,8 +297,29 @@ function MatrixView({
                           fontSize: '0.85rem',
                         }}
                       >
-                        <div>{s.content}</div>
-                        {s.tags.map((t) => (
+                        {editingStatement?.id === s.id ? (
+                          <div>
+                            <textarea
+                              autoFocus
+                              value={editingStatement.content}
+                              onChange={(e) => setEditingStatement({ ...editingStatement, content: e.target.value })}
+                              style={{ width: '100%', fontSize: '0.8rem', marginBottom: '0.2rem' }}
+                            />
+                            <input
+                              value={editingStatement.tags}
+                              onChange={(e) => setEditingStatement({ ...editingStatement, tags: e.target.value })}
+                              placeholder="taggar, kommaseparerat"
+                              style={{ width: '100%', fontSize: '0.75rem', marginBottom: '0.2rem' }}
+                            />
+                            <div style={{ display: 'flex', gap: '0.2rem' }}>
+                              <button onClick={submitStatementEdit} style={{ fontSize: '0.7rem' }}>Spara</button>
+                              <button onClick={() => setEditingStatement(null)} style={{ fontSize: '0.7rem' }}>Avbryt</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>{s.content}</div>
+                        )}
+                        {editingStatement?.id !== s.id && s.tags.map((t) => (
                           <span
                             key={t}
                             style={{
@@ -310,6 +350,14 @@ function MatrixView({
                           })}
 
                         <div style={{ marginTop: '0.2rem', display: 'flex', gap: '0.2rem' }}>
+                          {editingStatement?.id !== s.id && (
+                            <button
+                              onClick={() => setEditingStatement({ id: s.id, content: s.content, tags: s.tags.join(', ') })}
+                              style={{ fontSize: '0.7rem' }}
+                            >
+                              redigera
+                            </button>
+                          )}
                           <button onClick={() => onDeleteStatement(s.id)} style={{ fontSize: '0.7rem' }}>
                             ta bort
                           </button>

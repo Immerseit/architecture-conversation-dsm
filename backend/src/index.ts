@@ -213,10 +213,17 @@ app.post("/api/matrices/:id/statements", (req, res) => {
 app.patch("/api/statements/:id", (req, res) => {
   const statement = store.statements.find((s) => s.id === req.params.id);
   if (!statement) {
-    res.status(404).json({ error: "hittades inte" });
+    res.status(404).json({ error: "påstående hittades inte" });
     return;
   }
-  if (typeof req.body?.content === "string") statement.content = req.body.content;
+  if (typeof req.body?.content === "string") {
+    const content = req.body.content.trim();
+    if (!content) {
+      res.status(400).json({ error: "content krävs" });
+      return;
+    }
+    statement.content = content;
+  }
   if (Array.isArray(req.body?.tags)) statement.tags = req.body.tags.map(String);
   saveStore();
   res.json(statement);
