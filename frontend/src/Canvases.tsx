@@ -111,7 +111,7 @@ function SectionEditor({ section, values, onChange }: { section: CanvasSection; 
               onChange={(v) => onChange({ ...values, [section.sectionKey]: { ...row, [f.fieldKey]: v } })}
             />
             {f.referencedCanvas && (
-              <div style={{ fontSize: '0.65rem', color: '#888' }}>refererar till: {f.referencedCanvasName}</div>
+              <div style={{ fontSize: '0.65rem', color: '#888' }}>references: {f.referencedCanvasName}</div>
             )}
           </div>
         ))}
@@ -144,12 +144,12 @@ function SectionEditor({ section, values, onChange }: { section: CanvasSection; 
             onClick={() => onChange({ ...values, [section.sectionKey]: rows.filter((_, idx) => idx !== i) })}
             style={{ fontSize: '0.7rem' }}
           >
-            ta bort rad
+            remove row
           </button>
         </div>
       ))}
       <button onClick={() => onChange({ ...values, [section.sectionKey]: [...rows, {}] })} style={{ fontSize: '0.75rem' }}>
-        + Lägg till {section.fields[0]?.label ?? 'rad'}
+        + Add {section.fields[0]?.label ?? 'row'}
       </button>
     </div>
   )
@@ -210,7 +210,7 @@ export default function Canvases() {
             onClick={() => setSelectedTypeKey(t.key)}
             style={{ fontWeight: t.key === selectedTypeKey ? 'bold' : 'normal' }}
           >
-            {t.name} ({t.sectionCount} sektioner)
+            {t.name} ({t.sectionCount} sections)
           </button>
         ))}
       </div>
@@ -220,14 +220,14 @@ export default function Canvases() {
           <div style={{ minWidth: 220 }}>
             <h3>{definition.name}</h3>
             <button onClick={() => setEditing({ id: null, name: '', values: {} })} style={{ marginBottom: '0.5rem' }}>
-              + Ny {definition.name}
+              + New {definition.name}
             </button>
             <ul style={{ listStyle: 'none', padding: 0 }}>
               {instances.map((inst) => (
                 <li key={inst.id} style={{ marginBottom: '0.3rem' }}>
                   <button onClick={() => setEditing({ id: inst.id, name: inst.name, values: inst.values })}>{inst.name}</button>{' '}
                   <button onClick={() => remove(inst.id)} style={{ fontSize: '0.7rem' }}>
-                    ta bort
+                    delete
                   </button>
                 </li>
               ))}
@@ -239,7 +239,7 @@ export default function Canvases() {
               <input
                 value={editing.name}
                 onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                placeholder="Namn på den här instansen"
+                placeholder="Name for this instance"
                 style={{ width: '100%', padding: '0.4rem', marginBottom: '0.8rem', fontWeight: 'bold' }}
               />
               {definition.sections.map((s) => (
@@ -252,9 +252,9 @@ export default function Canvases() {
               ))}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={save} disabled={!editing.name.trim()}>
-                  Spara
+                  Save
                 </button>
-                <button onClick={() => setEditing(null)}>Avbryt</button>
+                <button onClick={() => setEditing(null)}>Cancel</button>
               </div>
             </div>
           )}

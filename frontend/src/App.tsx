@@ -132,7 +132,7 @@ function App() {
     const current = dimensions[index]
     const createDimension = (): Dimension => {
       const key = newDimensionKey()
-      return { key, name: 'Ny kolumn', description: '' }
+      return { key, name: 'New column', description: '' }
     }
 
     if (action === 'add-right') dimensions.splice(index + 1, 0, createDimension())
@@ -195,7 +195,7 @@ function App() {
           onClick={() => setView('matrices')}
           style={{ fontWeight: view === 'matrices' ? 'bold' : 'normal', padding: '0.4rem 0.8rem' }}
         >
-          Matriser
+          Matrices
         </button>
         <button
           onClick={() => setView('canvases')}
@@ -226,27 +226,27 @@ function App() {
               type="password"
               value={matrixKey}
               onChange={(e) => setMatrixKey(e.target.value)}
-              placeholder="Nyckel för privata matriser"
+              placeholder="Key for private matrices"
               style={{ flex: 1, padding: '0.5rem' }}
             />
-            <button type="button" onClick={() => setMatrixKey(matrixKey.trim())}>Ladda matriser</button>
+            <button type="button" onClick={() => setMatrixKey(matrixKey.trim())}>Load matrices</button>
           </div>
 
           <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <input
               value={newMatrixName}
               onChange={(e) => setNewMatrixName(e.target.value)}
-              placeholder="Namn på ny matris, t.ex. Current Architecture"
+              placeholder="Name for new matrix, e.g. Current Architecture"
               style={{ flex: 1, padding: '0.5rem' }}
             />
             <input
               type="password"
               value={newMatrixKey}
               onChange={(e) => setNewMatrixKey(e.target.value)}
-              placeholder="Valfri nyckel"
+              placeholder="Optional key"
               style={{ flex: 1, padding: '0.5rem' }}
             />
-            <button type="submit">Skapa matris</button>
+            <button type="submit">Create matrix</button>
           </form>
 
           {matrix && (
@@ -331,14 +331,14 @@ function MatrixView({
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>{matrix.name}</h2>
-        <button onClick={onDeleteMatrix}>Ta bort matris</button>
+        <button onClick={onDeleteMatrix}>Delete matrix</button>
       </div>
 
       <textarea
         value={manifest}
         onChange={(e) => setManifest(e.target.value)}
         onBlur={() => onSaveManifest(manifest)}
-        placeholder="Manifest — vad scopar den här konversationen?"
+        placeholder="Manifest — what does this conversation scope?"
         style={{ width: '100%', minHeight: '3rem', padding: '0.5rem', marginBottom: '1rem' }}
       />
 
@@ -361,13 +361,13 @@ function MatrixView({
                     boxSizing: 'border-box',
                     padding: 0,
                   }}
-                  aria-label={`Namn på kolumn ${d.name}`}
+                  aria-label={`Column name ${d.name}`}
                 />
                 <input
                   defaultValue={d.description}
                   onBlur={(e) => onChangeDimensionDescription(d.key, e.target.value)}
-                  placeholder="Beskrivning"
-                  aria-label={`Beskrivning för kolumn ${d.name}`}
+                  placeholder="Description"
+                  aria-label={`Description for column ${d.name}`}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -386,7 +386,7 @@ function MatrixView({
             ))}
           </tr>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '0.3rem' }}>Kolumn</th>
+            <th style={{ border: '1px solid #ccc', padding: '0.3rem' }}>Column</th>
             {matrix.dimensions.map((d) => (
               <th key={`${d.key}-actions`} style={{ border: '1px solid #ccc', padding: '0.3rem' }}>
                 <select
@@ -395,15 +395,15 @@ function MatrixView({
                     if (e.target.value) onChangeDimension(d.key, e.target.value)
                     e.target.value = ''
                   }}
-                  aria-label={`Åtgärd för kolumn ${d.name}`}
+                  aria-label={`Action for column ${d.name}`}
                   style={{ width: '100%' }}
                 >
-                  <option value="">Välj åtgärd</option>
-                  <option value="add-right">Ny kolumn till höger</option>
-                  <option value="add-left">Ny kolumn till vänster</option>
-                  <option value="delete">Ta bort kolumn</option>
-                  <option value="move-right">Flytta kolumn till höger</option>
-                  <option value="move-left">Flytta kolumn till vänster</option>
+                  <option value="">Select action</option>
+                  <option value="add-right">New column to the right</option>
+                  <option value="add-left">New column to the left</option>
+                  <option value="delete">Delete column</option>
+                  <option value="move-right">Move column right</option>
+                  <option value="move-left">Move column left</option>
                 </select>
               </th>
             ))}
@@ -451,12 +451,12 @@ function MatrixView({
                             <input
                               value={editingStatement.tags}
                               onChange={(e) => setEditingStatement({ ...editingStatement, tags: e.target.value })}
-                              placeholder="taggar, kommaseparerat"
+                              placeholder="tags, comma-separated"
                               style={{ width: '100%', fontSize: '0.75rem', marginBottom: '0.2rem' }}
                             />
                             <div style={{ display: 'flex', gap: '0.2rem' }}>
-                              <button onClick={submitStatementEdit} style={{ fontSize: '0.7rem' }}>Spara</button>
-                              <button onClick={() => setEditingStatement(null)} style={{ fontSize: '0.7rem' }}>Avbryt</button>
+                              <button onClick={submitStatementEdit} style={{ fontSize: '0.7rem' }}>Save</button>
+                              <button onClick={() => setEditingStatement(null)} style={{ fontSize: '0.7rem' }}>Cancel</button>
                             </div>
                           </div>
                         ) : (
@@ -486,7 +486,7 @@ function MatrixView({
                               <div key={l.id} style={{ fontSize: '0.7rem', color: '#555' }}>
                                 → {target?.content ?? '?'}{' '}
                                 <button onClick={() => onDeleteLink(l.id)} style={{ fontSize: '0.65rem' }}>
-                                  ta bort länk
+                                  remove link
                                 </button>
                               </div>
                             )
@@ -498,17 +498,17 @@ function MatrixView({
                               onClick={() => setEditingStatement({ id: s.id, content: s.content, tags: s.tags.join(', ') })}
                               style={{ fontSize: '0.7rem' }}
                             >
-                              redigera
+                              edit
                             </button>
                           )}
                           <button onClick={() => onDeleteStatement(s.id)} style={{ fontSize: '0.7rem' }}>
-                            ta bort
+                            delete
                           </button>
                           <button
                             onClick={() => setLinkingFrom(linkingFrom === s.id ? null : s.id)}
                             style={{ fontSize: '0.7rem' }}
                           >
-                            länka
+                            link
                           </button>
                         </div>
 
@@ -522,7 +522,7 @@ function MatrixView({
                             style={{ marginTop: '0.2rem', width: '100%', fontSize: '0.7rem' }}
                           >
                             <option value="" disabled>
-                              Länka till...
+                              Link to...
                             </option>
                             {matrix.statements
                               .filter((t) => t.id !== s.id)
@@ -542,21 +542,21 @@ function MatrixView({
                           autoFocus
                           value={draftContent}
                           onChange={(e) => setDraftContent(e.target.value)}
-                          placeholder="Innehåll..."
+                          placeholder="Content..."
                           style={{ width: '100%', fontSize: '0.8rem', marginBottom: '0.2rem' }}
                         />
                         <input
                           value={draftTags}
                           onChange={(e) => setDraftTags(e.target.value)}
-                          placeholder="taggar, kommaseparerat"
+                          placeholder="tags, comma-separated"
                           style={{ width: '100%', fontSize: '0.75rem', marginBottom: '0.2rem' }}
                         />
                         <div style={{ display: 'flex', gap: '0.2rem' }}>
                           <button onClick={() => submitStatement(level, d.key)} style={{ fontSize: '0.75rem' }}>
-                            Spara
+                            Save
                           </button>
                           <button onClick={() => setAddingCell(null)} style={{ fontSize: '0.75rem' }}>
-                            Avbryt
+                            Cancel
                           </button>
                         </div>
                       </div>
@@ -565,7 +565,7 @@ function MatrixView({
                         onClick={() => setAddingCell({ level, dimensionKey: d.key })}
                         style={{ fontSize: '0.75rem', width: '100%' }}
                       >
-                        + Lägg till
+                        + Add
                       </button>
                     )}
                   </td>

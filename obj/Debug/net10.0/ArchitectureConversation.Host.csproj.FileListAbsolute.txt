@@ -14,3 +14,19 @@ C:\Users\immat\source\repos\Immerseit\architecture-conversation-dsm\obj\Debug\ne
 C:\Users\immat\source\repos\Immerseit\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.genruntimeconfig.cache
 C:\Users\immat\source\repos\Immerseit\architecture-conversation-dsm\obj\Debug\net10.0\ref\ArchitectureConversation.Host.dll
 C:\Users\immat\source\repos\Immerseit\architecture-conversation-dsm\obj\Debug\net10.0\Architec.3E289EB9.Up2Date
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\bin\Debug\net10.0\ArchitectureConversation.Host.exe
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\bin\Debug\net10.0\ArchitectureConversation.Host.deps.json
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\bin\Debug\net10.0\ArchitectureConversation.Host.runtimeconfig.json
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\bin\Debug\net10.0\ArchitectureConversation.Host.dll
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\bin\Debug\net10.0\ArchitectureConversation.Host.pdb
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.AssemblyInfoInputs.cache
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.AssemblyInfo.cs
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.csproj.CoreCompileInputs.cache
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.sourcelink.json
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.dll
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\refint\ArchitectureConversation.Host.dll
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.pdb
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ArchitectureConversation.Host.genruntimeconfig.cache
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\ref\ArchitectureConversation.Host.dll
+C:\Users\jonno\OneDrive - Unionen\vscode-jn\architecture-conversation-dsm\obj\Debug\net10.0\Architec.3E289EB9.Up2Date

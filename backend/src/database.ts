@@ -19,8 +19,11 @@ function hashAccessKey(value: string): string {
 }
 
 function connectionConfig(database: string): sql.config {
-  const connectionString = process.env.AZURE_SQL_CONNECTION_STRING;
-  if (!connectionString) throw new Error("AZURE_SQL_CONNECTION_STRING saknas");
+  const connectionString =
+    process.env.AZURE_SQL_CONNECTION_STRING
+    ?? process.env.SQLCONNSTR_AZURE_SQL_CONNECTION_STRING
+    ?? process.env.CUSTOMCONNSTR_AZURE_SQL_CONNECTION_STRING;
+  if (!connectionString) throw new Error("AZURE_SQL_CONNECTION_STRING saknas (lägg in den i backend/.env eller App Service Configuration)");
 
   const values = new Map<string, string>();
   for (const part of connectionString.split(";")) {
@@ -31,6 +34,9 @@ function connectionConfig(database: string): sql.config {
   const user = values.get("user id") ?? values.get("uid");
   const password = values.get("password") ?? values.get("pwd");
   if (!server || !user || !password) throw new Error("AZURE_SQL_CONNECTION_STRING saknar server, user eller password");
+  if (user === "YOUR_USER" || password === "YOUR_PASSWORD") {
+    throw new Error("AZURE_SQL_CONNECTION_STRING använder placeholder-värden. Uppdatera backend/.env med riktiga credentials.");
+  }
 
   return {
     server,
