@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArchitectureConversation.Host")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9aba83c6b37cdcc5ec00a5b9b295a89ec3dda2e2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f83cc683f886305c8beaaccca6353d6a7e12db71")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArchitectureConversation.Host")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ArchitectureConversation.Host")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

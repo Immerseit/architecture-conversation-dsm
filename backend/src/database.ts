@@ -141,7 +141,9 @@ function mergeRows(rows: Array<{ AccessKey: string; JsonData: string }>): Store 
     for (const matrix of parsed.matrices) {
       if (row.AccessKey) {
         matrix.accessKey = row.AccessKey;
-        matrix.accessKeyHash = matrix.accessKeyHash ?? hashAccessKey(row.AccessKey);
+        // AccessKey is the authoritative value in SQL. Recompute the hash so
+        // rows copied or edited directly in SQL cannot retain a stale hash.
+        matrix.accessKeyHash = hashAccessKey(row.AccessKey);
       }
     }
     merged.matrices.push(...parsed.matrices);
