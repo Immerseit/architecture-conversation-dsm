@@ -43,6 +43,10 @@ interface MatrixDetail extends Matrix {
 
 const LEVELS = ['N1', 'N2', 'N3', 'N4'] as const
 
+function newDimensionKey() {
+  return `dimension-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 function App() {
   const [view, setView] = useState<'matrices' | 'canvases'>('matrices')
   const [matrices, setMatrices] = useState<Matrix[]>([])
@@ -94,6 +98,56 @@ function App() {
   async function saveManifest(value: string) {
     if (!matrix) return
     await api(`/api/matrices/${matrix.id}`, { method: 'PATCH', body: JSON.stringify({ manifest: value, key: matrixKey }) })
+  }
+
+  async function saveDimensions(dimensions: Dimension[]) {
+    if (!matrix) return
+    const updated = await api<Matrix>(`/api/matrices/${matrix.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ dimensions, key: matrixKey }),
+    })
+    setMatrix((current) => current ? { ...current, dimensions: updated.dimensions } : current)
+    setMatrices((current) => current.map((item) => item.id === updated.id ? { ...item, dimensions: updated.dimensions } : item))
+  }
+
+  async function renameDimension(dimensionKey: string, name: string) {
+    if (!matrix || !name.trim()) return
+    await saveDimensions(matrix.dimensions.map((dimension) =>
+      dimension.key === dimensionKey ? { ...dimension, name: name.trim() } : dimension,
+    ))
+  }
+
+  async function changeDimensionDescription(dimensionKey: string, description: string) {
+    if (!matrix) return
+    await saveDimensions(matrix.dimensions.map((dimension) =>
+      dimension.key === dimensionKey ? { ...dimension, description } : dimension,
+    ))
+  }
+
+  async function changeDimension(dimensionKey: string, action: string) {
+    if (!matrix) return
+    const index = matrix.dimensions.findIndex((dimension) => dimension.key === dimensionKey)
+    if (index < 0) return
+    const dimensions = [...matrix.dimensions]
+    const current = dimensions[index]
+    const createDimension = (): Dimension => {
+      const key = newDimensionKey()
+      return { key, name: 'Ny kolumn', description: '' }
+    }
+
+    if (action === 'add-right') dimensions.splice(index + 1, 0, createDimension())
+    if (action === 'add-left') dimensions.splice(index, 0, createDimension())
+    if (action === 'delete') {
+      if (dimensions.length <= 1) return
+      dimensions.splice(index, 1)
+    }
+    if (action === 'move-right' && index < dimensions.length - 1) {
+      dimensions.splice(index, 2, dimensions[index + 1], current)
+    }
+    if (action === 'move-left' && index > 0) {
+      dimensions.splice(index - 1, 2, current, dimensions[index - 1])
+    }
+    await saveDimensions(dimensions)
   }
 
   async function addStatement(level: string, dimensionKey: string, content: string, tags: string[]) {
@@ -205,6 +259,9 @@ function App() {
               onAddLink={addLink}
               onDeleteLink={deleteLink}
               onDeleteMatrix={() => deleteMatrix(matrix.id)}
+              onRenameDimension={renameDimension}
+              onChangeDimensionDescription={changeDimensionDescription}
+              onChangeDimension={changeDimension}
             />
           )}
         </>
@@ -222,6 +279,9 @@ function MatrixView({
   onAddLink,
   onDeleteLink,
   onDeleteMatrix,
+  onRenameDimension,
+  onChangeDimensionDescription,
+  onChangeDimension,
 }: {
   matrix: MatrixDetail
   onSaveManifest: (value: string) => void
@@ -231,6 +291,9 @@ function MatrixView({
   onAddLink: (fromId: string, toId: string) => void
   onDeleteLink: (id: string) => void
   onDeleteMatrix: () => void
+  onRenameDimension: (dimensionKey: string, name: string) => void
+  onChangeDimensionDescription: (dimensionKey: string, description: string) => void
+  onChangeDimension: (dimensionKey: string, action: string) => void
 }) {
   const [manifest, setManifest] = useState(matrix.manifest)
   const [addingCell, setAddingCell] = useState<{ level: string; dimensionKey: string } | null>(null)
@@ -285,8 +348,63 @@ function MatrixView({
             <th style={{ width: 60 }}></th>
             {matrix.dimensions.map((d) => (
               <th key={d.key} style={{ border: '1px solid #ccc', padding: '0.5rem', background: '#f5f5f5' }}>
-                <div>{d.name}</div>
-                <div style={{ fontWeight: 'normal', fontSize: '0.8rem', color: '#666' }}>{d.description}</div>
+                <input
+                  defaultValue={d.name}
+                  onBlur={(e) => onRenameDimension(d.key, e.target.value)}
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    boxSizing: 'border-box',
+                    padding: 0,
+                  }}
+                  aria-label={`Namn på kolumn ${d.name}`}
+                />
+                <input
+                  defaultValue={d.description}
+                  onBlur={(e) => onChangeDimensionDescription(d.key, e.target.value)}
+                  placeholder="Beskrivning"
+                  aria-label={`Beskrivning för kolumn ${d.name}`}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontWeight: 'normal',
+                    fontSize: '0.8rem',
+                    color: '#666',
+                    textAlign: 'center',
+                    boxSizing: 'border-box',
+                    padding: 0,
+                  }}
+                />
+              </th>
+            ))}
+          </tr>
+          <tr>
+            <th style={{ border: '1px solid #ccc', padding: '0.3rem' }}>Kolumn</th>
+            {matrix.dimensions.map((d) => (
+              <th key={`${d.key}-actions`} style={{ border: '1px solid #ccc', padding: '0.3rem' }}>
+                <select
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value) onChangeDimension(d.key, e.target.value)
+                    e.target.value = ''
+                  }}
+                  aria-label={`Åtgärd för kolumn ${d.name}`}
+                  style={{ width: '100%' }}
+                >
+                  <option value="">Välj åtgärd</option>
+                  <option value="add-right">Ny kolumn till höger</option>
+                  <option value="add-left">Ny kolumn till vänster</option>
+                  <option value="delete">Ta bort kolumn</option>
+                  <option value="move-right">Flytta kolumn till höger</option>
+                  <option value="move-left">Flytta kolumn till vänster</option>
+                </select>
               </th>
             ))}
           </tr>

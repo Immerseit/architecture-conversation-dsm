@@ -170,7 +170,29 @@ app.patch("/api/matrices/:id", async (req, res) => {
   const matrix = findAuthorizedMatrix(req, res);
   if (!matrix) return;
   if (typeof req.body?.manifest === "string") matrix.manifest = req.body.manifest;
-  if (Array.isArray(req.body?.dimensions)) matrix.dimensions = req.body.dimensions;
+  if (Array.isArray(req.body?.dimensions)) {
+    const dimensions = req.body.dimensions.filter(
+      (dimension: unknown): dimension is { key: string; name: string; description?: string } =>
+        !!dimension && typeof dimension === "object" &&
+        typeof (dimension as { key?: unknown }).key === "string" &&
+        typeof (dimension as { name?: unknown }).name === "string",
+    );
+    const dimensionKeys = new Set(dimensions.map((dimension) => dimension.key));
+    matrix.dimensions = dimensions.map((dimension) => ({
+      key: dimension.key,
+      name: dimension.name.trim() || "Ny kolumn",
+      description: typeof dimension.description === "string" ? dimension.description : "",
+    }));
+    const removedStatementIds = new Set(
+      store.statements
+        .filter((statement) => statement.matrixId === matrix.id && !dimensionKeys.has(statement.dimensionKey))
+        .map((statement) => statement.id),
+    );
+    store.statements = store.statements.filter((statement) => !removedStatementIds.has(statement.id));
+    store.links = store.links.filter(
+      (link) => !removedStatementIds.has(link.fromStatementId) && !removedStatementIds.has(link.toStatementId),
+    );
+  }
   await saveStore(store);
   res.json(publicMatrix(matrix));
 });
