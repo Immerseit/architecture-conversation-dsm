@@ -187,29 +187,40 @@ function App() {
   }
 
   return (
-    <main style={{ maxWidth: 1100, margin: '2rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
-      <h1>DSM — Architecture Conversation Matrix</h1>
+    <main className="app-shell" style={{ maxWidth: 1100, margin: '2rem auto', fontFamily: 'sans-serif', padding: '0 1rem' }}>
+      <header className="app-header">
+        <div className="brand-mark" aria-hidden="true">⌘</div>
+        <div>
+          <p className="eyebrow">Architecture conversation workspace</p>
+          <h1>DSM <span>—</span> Architecture Conversation Matrix</h1>
+        <p className="subtitle">Make complex architecture decisions visible, structured and easy to discuss.</p>
+                  <p className="subtitle"><a href="https://education.iasaglobal.org/whatsnew/articles/6a539c42000f3e490a7d?share=K1BN498Eczjau9mr_IXNQcoQw1ei5k4G8rXMqE3thBI">Read the specification</a> for how to work with the matrix, at this article on BTABoK at IASAGlobal.</p>
+                  
+        </div>
+      </header>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #ccc' }}>
+      <nav className="view-tabs" aria-label="Primary navigation" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid #ccc' }}>
         <button
           onClick={() => setView('matrices')}
+          className={view === 'matrices' ? 'active' : ''}
           style={{ fontWeight: view === 'matrices' ? 'bold' : 'normal', padding: '0.4rem 0.8rem' }}
         >
           Matrices
         </button>
         <button
           onClick={() => setView('canvases')}
+          className={view === 'canvases' ? 'active' : ''}
           style={{ fontWeight: view === 'canvases' ? 'bold' : 'normal', padding: '0.4rem 0.8rem' }}
         >
           Canvases
         </button>
-      </div>
+      </nav>
 
       {view === 'canvases' && <Canvases />}
 
       {view === 'matrices' && (
         <>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <div className="matrix-picker" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             {matrices.map((m) => (
               <button
                 key={m.id}
@@ -221,7 +232,7 @@ function App() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+          <div className="access-bar" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
             <input
               type="password"
               value={matrixKey}
@@ -232,7 +243,7 @@ function App() {
             <button type="button" onClick={() => setMatrixKey(matrixKey.trim())}>Load matrices</button>
           </div>
 
-          <form onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <form className="create-bar" onSubmit={createMatrix} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <input
               value={newMatrixName}
               onChange={(e) => setNewMatrixName(e.target.value)}
@@ -301,6 +312,7 @@ function MatrixView({
   const [draftTags, setDraftTags] = useState('')
   const [editingStatement, setEditingStatement] = useState<{ id: string; content: string; tags: string } | null>(null)
   const [linkingFrom, setLinkingFrom] = useState<string | null>(null)
+  const [showMatrixControls, setShowMatrixControls] = useState(true)
 
   useEffect(() => setManifest(matrix.manifest), [matrix.id, matrix.manifest])
 
@@ -328,10 +340,20 @@ function MatrixView({
   }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <section className={`matrix-view ${showMatrixControls ? '' : 'controls-hidden'}`}>
+      <div className="section-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>{matrix.name}</h2>
-        <button onClick={onDeleteMatrix}>Delete matrix</button>
+        <div className="matrix-heading-actions">
+          <button
+            type="button"
+            className="control-toggle"
+            onClick={() => setShowMatrixControls((visible) => !visible)}
+            aria-pressed={showMatrixControls}
+          >
+            {showMatrixControls ? 'Hide controls' : 'Show controls'}
+          </button>
+          <button onClick={onDeleteMatrix}>Delete matrix</button>
+        </div>
       </div>
 
       <textarea
@@ -575,7 +597,7 @@ function MatrixView({
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   )
 }
 

@@ -202,7 +202,7 @@ export default function Canvases() {
   }
 
   return (
-    <div>
+    <section className="canvases-view">
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
         {types.map((t) => (
           <button
@@ -260,6 +260,6 @@ export default function Canvases() {
           )}
         </div>
       )}
-    </div>
+    </section>
   )
 }
