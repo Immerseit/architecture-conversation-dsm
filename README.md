@@ -1,4 +1,4 @@
-# Architecture Conversation (DSM)
+# Immerse.Tool.DSM.WebApp
 
 A phase-less architecture matrix utilizing dimensions and fixed levels to facilitate collaborative design dialogues and map decision chains from current to target state. Information about the structure is published on IASAGlobals learning platform; https://education.iasaglobal.org/whatsnew/articles/6a539c42000f3e490a7d?share=K1BN498Eczjau9mr_IXNQcoQw1ei5k4G8rXMqE3thBI. More of this will be moved to here over time.
 

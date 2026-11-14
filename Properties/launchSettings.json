@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Architecture Conversation (npm run dev)": {
+    "Immerse.Tool.DSM.WebApp (npm run dev)": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\scripts\\start-dev.cmd",
       "commandLineArgs": "run dev",

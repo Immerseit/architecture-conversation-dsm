@@ -1,4 +1,4 @@
-namespace ArchitectureConversation.Host;
+namespace Immerse.Tool.DSM.WebApp;
 
 internal static class Program
 {

@@ -28,4 +28,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Immerse.Tool.DSM.WebApp.csproj" />
+    <None Include="Immerse.Tool.DSM.WebApp.sln" />
+  </ItemGroup>
 </Project>

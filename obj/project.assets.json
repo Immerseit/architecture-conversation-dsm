@@ -14,9 +14,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\immat\\source\\repos\\Immerseit\\architecture-conversation-dsm\\ArchitectureConversation.Host.csproj",
-      "projectName": "ArchitectureConversation.Host",
-      "projectPath": "C:\\Users\\immat\\source\\repos\\Immerseit\\architecture-conversation-dsm\\ArchitectureConversation.Host.csproj",
+      "projectUniqueName": "C:\\Users\\immat\\source\\repos\\Immerseit\\architecture-conversation-dsm\\Immerse.Tool.DSM.WebApp.csproj",
+      "projectName": "Immerse.Tool.DSM.WebApp",
+      "projectPath": "C:\\Users\\immat\\source\\repos\\Immerseit\\architecture-conversation-dsm\\Immerse.Tool.DSM.WebApp.csproj",
       "packagesPath": "C:\\Users\\immat\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\immat\\source\\repos\\Immerseit\\architecture-conversation-dsm\\obj\\",
       "projectStyle": "PackageReference",
